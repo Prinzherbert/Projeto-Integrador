@@ -1,11 +1,43 @@
-const http = require('http');
+const http = require('http')
+const url = require('url')
+const mysql = require('mysql')
+
+var con = mysql.createConnection({
+  host: "localhost",
+  port: 3307,
+  user: "root",
+  password: ""
+})
+
+con.connect(function(err) {
+  if (err) throw err;
+  console.log("Connected!")
+})
 
 const server = http.createServer((req, res) => {
-  res.writeHead(200, { 'Content-Type': 'text/plain' });
-  res.end('Hello, World!\n');
-});
+  const reqUrl = url.parse(req.url).pathname
+  if(reqUrl == '/') {
+    res.write('hello world')
+    res.end()
+  }
+  else if(reqUrl == "/parts/models") {
+    let response
+    con.query("SELECT * FROM acme.part_models", function (err, result) {
+      if (err) throw err
+      res.writeHead(200, {'Content-Type': 'application/json'})
+      res.write(result)
+      console.log(result)
+    });
+    
+    res.end()
+  }
+  else if(reqUrl == "/parts/units") {
+    res.write('hello parts')
+    res.end()
+  }
+})
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000
 server.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log(`Server is running on port ${PORT}`)
 });
