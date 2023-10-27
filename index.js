@@ -18,7 +18,7 @@ con.connect(function(err) {
 
 app.get('/', function(req, res) { 
   res.json({ 
-    body: "Hello World!"
+    body: "Server up"
   }); 
 }); 
 
