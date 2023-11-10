@@ -73,7 +73,6 @@ app.get('/parts/units', function(req, res) {
   con.query("SELECT * FROM acme.part_units", function (err, result) {
     if (err) return res.status(400).json({error: err, message: "Error while checking part units."})
     res.json(result)
-    console.log(result)
   })
 })
 
@@ -82,6 +81,47 @@ app.post('/parts/units', function(req, res) {
   con.query(`INSERT INTO acme.part_units (model_id, id, current_airport_id) VALUES ('${request.model_id}', '${request.id}', '${request.current_airport_id}')`, function(err, result) {
     if (err) return res.status(400).json({error: err, message: "Error while creating the part unit."})
     res.json({result: result, message: "Successfully created new part unit."})
+  })
+})
+
+app.delete('/parts/units', function(req, res) {
+  let request = req.body
+  con.query(`DELETE FROM acme.part_units WHERE model_id = '${request.model_id}' AND id = '${request.id}'`, function(err, result) {
+    if (err) return res.status(400).json({error: err, message: "Error while deleting the part unit."})
+    res.json({result: result, message: "Successfully deleted part unit."})
+  })
+})
+
+app.post('/parts/units/availability', function(req, res) {
+  let request = req.body
+  con.query(`UPDATE acme.part_units SET availability = '${request.availability}' WHERE model_id = '${request.model_id}' AND id = '${request.id}'`, function(err, result) {
+    if (err) return res.status(400).json({error: err, message: "Error while setting availability for the part unit."})
+    res.json({result: result, message: "Successfully set availability for part unit."})
+  })
+})
+
+app.get('/airships', function(req, res) {
+  con.query(`SELECT * FROM acme.airships`, function (err, result) {
+    if (err) return res.status(400).json({error: err, message: "Error while checking airships."})
+    res.json(result)
+  })
+})
+
+app.post('/airships', function(req, res) {
+  let request = req.body
+  request.last_maintenance ? request.last_maintenance = "'" + request.last_maintenance + "'" : request.last_maintenance = 'NULL'
+  request.current_airport_id ? request.current_airport_id = "'" + request.current_airport_id + "'" : request.current_airport_id = 'NULL'
+  con.query(`INSERT INTO acme.airships (model, brand, last_maintenance, current_airport_id) VALUES ('${request.model}', '${request.brand}', ${request.last_maintenance}, ${request.current_airport_id})`, function(err, result) {
+    if (err) return res.status(400).json({error: err, message: "Error while creating the airship."})
+    res.json({result: result, message: "Successfully created new airship."})
+  })
+})
+
+app.post('/maintenance', function(req, res) {
+  let request = req.body
+  con.query(`INSERT INTO acme.maintenances (affected_airship_id, motive_title, motive_description, instructions, requester_email, status) VALUES ('${request.airship}', '${request.title}', '${request.description}', '${request.instructions}', '${request.requester}', 'OPEN')`, function(err, result) {
+    if (err) return res.status(400).json({error: err, message: "Error while creating the maintenance."})
+    res.json({result: result, message: "Successfully created new maintenance."})
   })
 })
   
