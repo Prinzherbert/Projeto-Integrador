@@ -7,6 +7,10 @@ const app = express()
 
 const passwordSaltRounds = 10
 
+// ------------
+// Server setup
+// ------------
+
 app.use(express.json())
 
 var con = mysql.createConnection({
@@ -26,6 +30,10 @@ app.get('/', function(req, res) {
     body: "Server up."
   })
 })
+
+// -----------
+// User routes
+// -----------
 
 app.get('/user', function(req, res) {
   let request = req.body
@@ -54,6 +62,10 @@ app.get('/user/authenticate', async function(req, res) {
   })
 })
 
+// ------------
+// Parts routes
+// ------------
+
 app.get('/parts/models', function(req, res) { 
   con.query("SELECT * FROM acme.part_models", function (err, result) {
     if (err) return res.status(400).json({error: err, message: "Error while checking part models."})
@@ -76,12 +88,25 @@ app.get('/parts/units', function(req, res) {
   })
 })
 
-app.post('/parts/units', function(req, res) {
+app.post('/parts/units', async function(req, res) {
   let request = req.body
-  con.query(`INSERT INTO acme.part_units (model_id, id, current_airport_id) VALUES ('${request.model_id}', '${request.id}', '${request.current_airport_id}')`, function(err, result) {
-    if (err) return res.status(400).json({error: err, message: "Error while creating the part unit."})
-    res.json({result: result, message: "Successfully created new part unit."})
+  let partExists = false
+
+  partExists = con.query(`SELECT * FROM acme.part_units WHERE model_id = '${request.model_id}' AND id = '${request.id}'`, function(err, result) {
+    return result.length > 0
   })
+
+  if(partExists){
+    con.query(`UPDATE acme.part_units SET availability = 'AVAILABLE' WHERE model_id = '${request.model_id}' AND id = '${request.id}'`, function(err, result) {
+      if (err) return res.status(400).json({error: err, message: "Error while setting availability for the part unit."})
+      return res.json({result: result, message: "Successfully set availability for part unit."})
+    })
+  } else {
+    con.query(`INSERT INTO acme.part_units (model_id, id, current_airport_id) VALUES ('${request.model_id}', '${request.id}', '${request.current_airport_id}')`, function(err, result) {
+      if (err) return res.status(400).json({error: err, message: "Error while creating the part unit."})
+      res.json({result: result, message: "Successfully created new part unit."})
+    })
+  }
 })
 
 app.delete('/parts/units', function(req, res) {
@@ -100,6 +125,10 @@ app.post('/parts/units/availability', function(req, res) {
   })
 })
 
+// --------------
+// Airship routes
+// --------------
+
 app.get('/airships', function(req, res) {
   con.query(`SELECT * FROM acme.airships`, function (err, result) {
     if (err) return res.status(400).json({error: err, message: "Error while checking airships."})
@@ -116,6 +145,10 @@ app.post('/airships', function(req, res) {
     res.json({result: result, message: "Successfully created new airship."})
   })
 })
+
+// ------------------
+// Maintenance routes
+// ------------------
 
 app.post('/maintenance', function(req, res) {
   let request = req.body
