@@ -181,7 +181,7 @@ app.get('/maintenance/details', function(req, res) {
         if (err) return res.status(400).json({error: err, message: "Error while checking part removals."})
         response.part_removal = result
 
-        con.query(`SELECT * FROM acme.users WHERE email IN (SELECT user_email FROM acme.maintenance_workers_request WHERE maintenance_id = '${request.maintenance}')`, function(err, result) {
+        con.query(`SELECT email, name, surname FROM acme.users WHERE email IN (SELECT user_email FROM acme.maintenance_workers_request WHERE maintenance_id = '${request.maintenance}')`, function(err, result) {
           if (err) return res.status(400).json({error: err, message: "Error while checking workers."})
           response.workers = result
 
