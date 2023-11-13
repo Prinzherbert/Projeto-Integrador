@@ -158,7 +158,7 @@ app.post('/maintenance', function(req, res) {
   })
 })
 
-app.get('/maintenance', function(req, res) {
+app.get('/maintenances', function(req, res) {
   con.query(`SELECT * FROM acme.maintenances`, function(err, result) {
     if (err) return res.status(400).json({error: err, message: "Error while checking maintenances."})
     res.json(result)
@@ -173,11 +173,11 @@ app.get('/maintenance/details', function(req, res) {
     if (err) return res.status(400).json({error: err, message: "Error while checking maintenance."})
     response = result[0]
 
-    con.query(`SELECT * FROM acme.part_units WHERE model_id IN (SELECT model_id FROM acme.parts_request WHERE maintenance_id = '${request.maintenance}') AND id IN (SELECT id FROM acme.parts_request WHERE maintenance_id = '${request.maintenance}')`, function(err, result) {
+    con.query(`SELECT * FROM acme.part_units pu WHERE EXISTS (SELECT 1 FROM acme.parts_request pr WHERE pr.maintenance_id = '${request.maintenance}' AND pr.part_model_id = pu.model_id AND pr.part_unit_id = pu.id)`, function(err, result) {
       if (err) return res.status(400).json({error: err, message: "Error while checking part requests."})
       response.part_requests =  result
 
-      con.query(`SELECT * FROM acme.parts_removal WHERE maintenance_id = '${request.maintenance}'`, function(err, result) {
+      con.query(`SELECT * FROM acme.part_units pu WHERE EXISTS (SELECT 1 FROM acme.parts_removal pr WHERE pr.maintenance_id = '${request.maintenance}' AND pr.part_model_id = pu.model_id AND pr.part_unit_id = pu.id)`, function(err, result) {
         if (err) return res.status(400).json({error: err, message: "Error while checking part removals."})
         response.part_removal = result
 
