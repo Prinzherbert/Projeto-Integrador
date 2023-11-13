@@ -233,6 +233,14 @@ app.post('/maintenance/create_checklist_item', function(req, res) {
     res.json({result: result, message: "Successfully created the checklist item."})
   })
 })
+
+app.post('/maintenance/change_checklist_item', function(req, res) {
+  let request = req.body
+  con.query(`UPDATE acme.maintenance_checklist_item SET done = ${request.value} WHERE id = '${request.item}'`, function(err, result) {
+    if (err) return res.status(400).json({error: err, message: "Error while updating checklist item status."})
+    res.json({result: result, message: "Successfully updated checklist item status."})
+  })
+})
   
 const PORT = process.env.PORT || 3000
 app.listen(PORT, function(req, res) { 
