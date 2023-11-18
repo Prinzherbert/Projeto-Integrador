@@ -1,7 +1,7 @@
 const http = require('http')
 const url = require('url')
 const bcrypt = require('bcrypt')
-const mysql = require('mysql')
+const mysql = require('mysql2')
 const express = require('express')
 const app = express()
 
@@ -14,10 +14,10 @@ const passwordSaltRounds = 10
 app.use(express.json())
 
 var con = mysql.createConnection({
-  host: "localhost",
-  port: 3307,
-  user: "root",
-  password: ""
+  host: process.env.DB_HOST || "localhost",
+  port: process.env.DB_PORT || 3307,
+  user: process.env.DB_USER || "root",
+  password: process.env.DB_PASSWORD || ""
 })
 
 con.connect(function(err) {
