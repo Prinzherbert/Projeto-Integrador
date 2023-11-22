@@ -52,7 +52,7 @@ app.post('/user/register', async function(req, res) {
   })
 })
 
-app.get('/user/authenticate', async function(req, res) {
+app.post('/user/authenticate', async function(req, res) {
   let request = req.body
   con.query(`SELECT password FROM acme.users WHERE email = '${request.email}'`, async function(err, result) {
     if (err) return res.status(400).json({error: "AUTH_ERROR", message: "Error while authenticating user."})
