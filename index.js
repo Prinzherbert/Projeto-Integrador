@@ -55,6 +55,7 @@ app.post('/user/register', async function(req, res) {
 app.post('/user/authenticate', async function(req, res) {
   let request = req.body
   con.query(`SELECT password FROM acme.users WHERE email = '${request.email}'`, async function(err, result) {
+    if (result.length == 0) return res.json({authenticated: false, message: 'Invalid credentials'})
     if (err) return res.status(400).json({error: "AUTH_ERROR", message: "Error while authenticating user."})
     let passwordCorrect = await bcrypt.compare(request.password, result[0].password)
     if (!passwordCorrect) return res.json({authenticated: false, message: 'Invalid credentials'})
