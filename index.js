@@ -58,7 +58,7 @@ app.get('/user/authenticate', async function(req, res) {
     if (err) return res.status(400).json({error: "AUTH_ERROR", message: "Error while authenticating user."})
     let passwordCorrect = await bcrypt.compare(request.password, result[0].password)
     if (!passwordCorrect) return res.json({authenticated: false, message: 'Invalid credentials'})
-    res.json({result: true, message: "Authentication successful."})
+    res.json({authenticated: true, message: "Authentication successful."})
   })
 })
 
