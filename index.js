@@ -107,7 +107,6 @@ app.post('/parts/units', async function(req, res) {
       })
     }
   })
-
 })
 
 app.delete('/parts/units', function(req, res) {
@@ -123,6 +122,29 @@ app.post('/parts/units/availability', function(req, res) {
   con.query(`UPDATE acme.part_units SET availability = '${request.availability}' WHERE model_id = '${request.model_id}' AND id = '${request.id}'`, function(err, result) {
     if (err) return res.status(400).json({error: err, message: "Error while setting availability for the part unit."})
     res.json({result: result, message: "Successfully set availability for part unit."})
+  })
+})
+
+app.post('/parts/units/toggle', function(req, res) {
+  let request = req.body
+
+  con.query(`SELECT * FROM acme.part_units WHERE model_id = '${request.model_id}' AND id = '${request.id}'`, function(err, result) {
+    partExists = result.length > 0
+    if(partExists){
+      let setAvailability
+      if(result[0].availability == 'AVAILABLE') setAvailability = 'UNAVAILABLE'
+      if(result[0].availability == 'UNAVAILABLE') setAvailability = 'AVAILABLE'
+      console.log(setAvailability)
+      con.query(`UPDATE acme.part_units SET availability = '${setAvailability}' WHERE model_id = '${request.model_id}' AND id = '${request.id}'`, function(err, result) {
+        if (err) return res.status(400).json({error: err, message: "Error while setting availability for the part unit."})
+        return res.json({result: result, message: "Successfully set availability for part unit."})
+      })
+    } else {
+      con.query(`INSERT INTO acme.part_units (model_id, id, current_airport_id) VALUES ('${request.model_id}', '${request.id}', '${request.current_airport_id}')`, function(err, result) {
+        if (err) return res.status(400).json({error: err, message: "Error while creating the part unit."})
+        res.json({result: result, message: "Successfully created new part unit."})
+      })
+    }
   })
 })
 
