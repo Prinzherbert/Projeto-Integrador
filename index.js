@@ -92,6 +92,7 @@ app.get('/parts/units', function(req, res) {
 app.post('/parts/units', async function(req, res) {
   let request = req.body
   let partExists = false
+  if (!request.current_airport_id) request.current_airport_id = 1
 
   con.query(`SELECT * FROM acme.part_units WHERE model_id = '${request.model_id}' AND id = '${request.id}'`, function(err, result) {
     partExists = result.length > 0
