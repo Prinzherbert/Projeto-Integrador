@@ -189,7 +189,7 @@ app.get('/maintenances', function(req, res) {
   })
 })
 
-app.get('/maintenance/details', function(req, res) {
+app.post('/maintenance/details', function(req, res) {
   let request = req.body
   let response
 
