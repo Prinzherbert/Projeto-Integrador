@@ -265,6 +265,14 @@ app.post('/maintenance/change_checklist_item', function(req, res) {
     res.json({result: result, message: "Successfully updated checklist item status."})
   })
 })
+
+app.post('/maintenance/set_status', function(req, res) {
+  let request = req.body
+  con.query(`UPDATE acme.maintenances SET status = '${request.status}' WHERE id = '${request.id}'`, function(err, result) {
+    if (err) return res.status(400).json({error: err, message: "Error while setting status for maintenance."})
+    res.json({result: result, message: "Successfully set status for maintenance."})
+  })
+})
   
 const PORT = process.env.PORT || 3000
 app.listen(PORT, function(req, res) { 
