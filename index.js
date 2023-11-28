@@ -35,7 +35,7 @@ app.get('/', function(req, res) {
 // User routes
 // -----------
 
-app.get('/user', function(req, res) {
+app.post('/user', function(req, res) {
   let request = req.body
   con.query(`SELECT (email, name, surname) FROM acme.users WHERE email = '${request.email}'`, function (err, result) {
     if (err) return res.status(400).json({error: "AUTH_ERROR", message: "Error while checking user."})
