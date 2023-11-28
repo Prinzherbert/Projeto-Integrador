@@ -233,12 +233,28 @@ app.post('/maintenance/request_part', function(req, res) {
 
 app.post('/maintenance/remove_part', function(req, res) {
   let request = req.body
-  con.query(`INSERT INTO acme.parts_removal (maintenance_id, part_model_id, part_unit_id) VALUES ('${request.maintenance}', '${request.part_model}', '${request.part_unit}')`, function(err, result) {
-    if (err) return res.status(400).json({error: err, message: "Error while requesting the part."})
-    con.query(`UPDATE acme.part_units SET availability = 'AVAILABLE' WHERE model_id = '${request.part_model}' AND id = '${request.part_unit}'`, function(err, result) {
-      if (err) return res.status(400).json({error: err, message: "Error while updating part availability."})
-    })
-    res.json({result: result, message: "Successfully requested the part for the maintenance."})
+  let partExists = false
+  if (!request.current_airport_id) request.current_airport_id = 1
+
+  con.query(`SELECT * FROM acme.part_units WHERE model_id = '${request.model_id}' AND id = '${request.id}'`, function(err, result) {
+    partExists = result.length > 0
+    if(partExists){
+      con.query(`INSERT INTO acme.parts_removal (maintenance_id, part_model_id, part_unit_id) VALUES ('${request.maintenance}', '${request.part_model}', '${request.part_unit}')`, function(err, result) {
+        if (err) return res.status(400).json({error: err, message: "Error while requesting the part."})
+        con.query(`UPDATE acme.part_units SET availability = 'AVAILABLE' WHERE model_id = '${request.part_model}' AND id = '${request.part_unit}'`, function(err, result) {
+          if (err) return res.status(400).json({error: err, message: "Error while updating part availability."})
+        })
+        res.json({result: result, message: "Successfully removed the part for the maintenance."})
+      })
+    } else {
+      con.query(`INSERT INTO acme.part_units (model_id, id, current_airport_id) VALUES ('${request.model_id}', '${request.id}', '${request.current_airport_id}')`, function(err, result) {
+        if (err) return res.status(400).json({error: err, message: "Error while creating the part unit."})
+        con.query(`INSERT INTO acme.parts_removal (maintenance_id, part_model_id, part_unit_id) VALUES ('${request.maintenance}', '${request.part_model}', '${request.part_unit}')`, function(err, result) {
+          if (err) return res.status(400).json({error: err, message: "Error while requesting the part."})
+          res.json({result: result, message: "Successfully removed the part for the maintenance."})
+        })
+      })
+    }
   })
 })
 
